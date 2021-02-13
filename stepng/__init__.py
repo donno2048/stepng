@@ -9,7 +9,7 @@ def encrypt(key: int) -> None:
     bin_message = [bin(i).replace('0b', '').zfill(8) for i in bytearray(text + '\x00', 'utf8')]
     for i in range(len(bin_message)):
         for j in range(8): output[key + 8 * i + j] = output[key + 8 * i + j][:-1] + bin_message[i][j]
-    open(asksaveasfilename(filetypes = [('PNG files', '*.png')]) + '.png', 'wb').write(b''.join([int(i, 2).to_bytes((len(i) + 7) // 8, byteorder='big') for i in output]))
+    open(asksaveasfilename(filetypes = [('PNG files', '*.png')]) + '.png', 'wb').write(b''.join([int(i, 2).to_bytes(1, 'big') for i in output]))
 def decrypt(key: int) -> None:
     Tk().withdraw()
     response = ''.join([i[-1] for i in [bin(i).replace('0b', '') for i in open(askopenfilename(filetypes = [('PNG files', '*.png')]), 'rb').read()][key:]])
