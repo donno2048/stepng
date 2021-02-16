@@ -17,7 +17,7 @@ From GitHub:
 From the CLI:
 
 ```bash
-usage: python -m stepng [-h] -k  (-e | -d)
+usage: stepng [-h] -k  (-e | -d)
 
 Encrypt your data in photos
 
