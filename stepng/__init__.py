@@ -1,4 +1,3 @@
-from argparse import ArgumentParser
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter.simpledialog import askstring
@@ -18,7 +17,7 @@ def decrypt(key: int) -> None:
     response[-1] += '0' * (8 - len(response[-1]))
     print(''.join([chr(int(i, 2)) for i in response]))
 def main() -> None:
-    parser = ArgumentParser(description = 'Encrypt your data in photos')
+    parser = __import__('argparse').ArgumentParser(description = 'Encrypt your data in photos')
     parser.add_argument('-k', '--key', metavar = '', required = True, type = int, help = 'Key to encrypt with ("password")')
     group = parser.add_mutually_exclusive_group(required = True)
     group.add_argument('-e', '--encrypt', action = 'store_true', help = 'Create a new image')
