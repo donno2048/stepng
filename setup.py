@@ -8,7 +8,7 @@ setup(
     url = 'https://github.com/donno2048/stepng',
     packages = find_packages(),
     license = 'MIT',
-    requires=["opencv-python"],
+    install_requires=["opencv-python"],
     author = 'Elisha Hollander',
     classifiers = ['Programming Language :: Python :: 3'],
     entry_points={ 'console_scripts': [ 'stepng=stepng.__init__:main' ] }
