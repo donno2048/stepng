@@ -1,27 +1,65 @@
 from tkinter import Tk
-from tkinter.filedialog import askopenfilename, asksaveasfilename
+from cv2 import imwrite, imread
+from argparse import ArgumentParser
 from tkinter.simpledialog import askstring
-def encrypt(key: int) -> None:
+from tkinter.filedialog import askopenfilename, asksaveasfilename
+def encrypt() -> None:
+    global image, mask0, mask1, x, y, channel
     t = Tk()
     t.withdraw()
-    text, output = askstring("Give me a string to encrypt", t), [bin(i).replace('0b', '') for i in open(askopenfilename(filetypes = [('PNG files', '*.png')]), 'rb').read()]
-    bin_message = [bin(i).replace('0b', '').zfill(8) for i in bytearray(text + '\x00', 'utf8')]
-    for i in range(len(bin_message)):
-        for j in range(8): output[key + 8 * i + j] = output[key + 8 * i + j][:-1] + bin_message[i][j]
-    open(asksaveasfilename(filetypes = [('PNG files', '*.png')]) + '.png', 'wb').write(b''.join([int(i, 2).to_bytes(1, 'big') for i in output]))
-def decrypt(key: int) -> None:
+    text, image, mask0, mask1, x, y, channel = askstring("Give me a string to encrypt", t), imread(askopenfilename(filetypes = [('PNG files', '*.png')])), 254, 1, 0, 0, 0
+    def append(bits: str) -> None:
+        global image, mask0, mask1, x, y, channel
+        for c in bits:
+            val = list(image[y, x])
+            if int(c) == 1: val[channel] = int(val[channel]) | mask1
+            else: val[channel] = int(val[channel]) & mask0
+            image[y, x] = tuple(val)
+            channel += 1
+            if channel == image.shape[2]:
+                channel = 0
+                x += 1
+                if x == image.shape[1]:
+                    x = 0
+                    y += 1
+                    if y == image.shape[0]:
+                        y = 0
+                        if mask1 == 128: raise ValueError("Image too small")
+                        else:
+                            mask0 -= mask1
+                            mask1 *= 2
+    append(bin(len(text))[2:].zfill(16))
+    for char in text: append(bin(ord(char))[2:].zfill(8))
+    imwrite(asksaveasfilename(filetypes = [('PNG files', '*.png')]) + ".png", image)
+def decrypt() -> None:
+    global image, mask0, mask1, x, y, channel
     Tk().withdraw()
-    response = ''.join([i[-1] for i in [bin(i).replace('0b', '') for i in open(askopenfilename(filetypes = [('PNG files', '*.png')]), 'rb').read()][key:]])
-    response = response[:response.find('0' * 8)]
-    response = [response[i:i + 8] for i in range(0, len(response), 8)]
-    response[-1] += '0' * (8 - len(response[-1]))
-    print(''.join([chr(int(i, 2)) for i in response]))
+    image, mask0, mask1, x, y, channel = imread(askopenfilename(filetypes = [('PNG files', '*.png')])), 254, 1, 0, 0, 0
+    def read_next() -> None:
+        global image, mask0, mask1, x, y, channel
+        val = image[y, x][channel]
+        val = int(val) & mask1
+        channel += 1
+        if channel == image.shape[2]:
+            channel = 0
+            x += 1
+            if x == image.shape[1]:
+                x = 0
+                y += 1
+                if y == image.shape[0]:
+                    y = 0
+                    if mask1 == 128: raise ValueError("Image too small")
+                    else:
+                        mask0 -= mask1
+                        mask1 *= 2
+        if val: return "1"
+        return "0"
+    print(str().join([chr(int(str().join([read_next() for _ in range(8)]), 2)) for _ in range(int(str().join([read_next() for _ in range(16)]), 2))]))
 def main() -> None:
-    parser = __import__('argparse').ArgumentParser(description = 'Encrypt your data in photos')
-    parser.add_argument('-k', '--key', metavar = '', required = True, type = int, help = 'Key to encrypt with ("password")')
+    parser = ArgumentParser(description = 'Encrypt your data in photos')
     group = parser.add_mutually_exclusive_group(required = True)
     group.add_argument('-e', '--encrypt', action = 'store_true', help = 'Create a new image')
     group.add_argument('-d', '--decrypt', action = 'store_true', help = 'Decrypt an existing image')
     args = parser.parse_args()
-    if args.encrypt: encrypt(args.key)
-    elif args.decrypt: decrypt(args.key)
+    if args.encrypt: encrypt()
+    elif args.decrypt: decrypt()
