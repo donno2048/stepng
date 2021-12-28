@@ -4,13 +4,23 @@ Encode data into photos
 
 ## install
 
-(tkinter required - installed by default on Windows)
+tkinter required - installed by default on Windows, on linux (Debian) use this:
 
-From Pypi:
+```sh
+sudo apt-get install python3-tk -y
+```
+
+On Linux you may have to run this to use open cv:
+
+```sh
+sudo apt-get install ffmpeg libsm6 libxext6 -y
+```
+
+### From PyPI
 
 `python -m pip install stepng`
 
-From GitHub:
+### From GitHub
 
 `python -m pip install git+https://github.com/donno2048/stepng`
 
