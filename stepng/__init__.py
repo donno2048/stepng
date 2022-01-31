@@ -30,7 +30,9 @@ def encrypt() -> None:
                             mask1 *= 2
     append(bin(len(text))[2:].zfill(16))
     for char in text: append(bin(ord(char))[2:].zfill(8))
-    imwrite(asksaveasfilename(filetypes = [('PNG files', '*.png')]) + ".png", image)
+    filename = asksaveasfilename(filetypes = [('PNG files', '*.png')])
+    if not filename.endswith(".png"): filename += ".png"
+    imwrite(filename, image)
 def decrypt() -> None:
     global image, mask0, mask1, x, y, channel
     Tk().withdraw()
